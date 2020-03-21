@@ -50,4 +50,10 @@ api = Api(app)
 
 
 
+from flask_backend.resources.rest_account import RESTAccount
+api.add_resource(RESTAccount, "/backend/database/account")
+
+
+
+
 from flask_backend import routes
