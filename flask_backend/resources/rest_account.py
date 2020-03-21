@@ -1,5 +1,6 @@
 from flask_restful import Resource
-from flask_backend.models.db_authentication import DBAccount, APIKey
+from flask_backend.models.db_account import DBAccount
+from flask_backend.models.db_authentication import APIKey
 from flask_backend.routes import get_params_dict
 
 from flask import request
@@ -53,6 +54,14 @@ class RESTAccount(Resource):
     def post(self):
         # Create a new account
         params_dict = get_params_dict(request)
+
+        existing_account_email = DBAccount.query.filter(DBAccount.email == params_dict["account_email"]).first()
+        if existing_account_email is not None:
+            return {"status": "email already taken"}
+
+        existing_account_phone = DBAccount.query.filter(DBAccount.phone == params_dict["account_phone"]).first()
+        if existing_account_phone is not None:
+            return {"status": "phone number already taken"}
 
         new_account = DBAccount()
 
