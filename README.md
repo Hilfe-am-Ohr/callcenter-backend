@@ -1,7 +1,7 @@
 
 [*See Frontend Repository*](https://github.com/dostuffthatmatters/callcenter-frontend)
 
-## Callcenter for People without Internet Access
+## Hotline for People without Internet Access
 
 #### Tech Stack
 
@@ -11,5 +11,5 @@
 * Heroku (AWS) Cloud Hosting
 * Heroku Postgres Database
 
-* Twilio for SMS and Email Communication
+* Twilio for SMS, Phone and Email Communication
 * Google Maps for Map Components
