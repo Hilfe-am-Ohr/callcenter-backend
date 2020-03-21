@@ -95,18 +95,10 @@ class RESTAccount(Resource):
         else:
             return {"status": "city is missing"}
 
-        if "account_country" in params_dict:
-            country = params_dict["account_country"]
-
-            if len(country) >= 2:
-                new_account.city = country
-            else:
-                return {"status": "country is invalid"}
-        else:
-            return {"status": "country is missing"}
+        new_account.country = "Germany"
 
         request_url = f"https://maps.googleapis.com/maps/api/geocode/json?" \
-                      f"address={new_account.street.replace(' ', '+')},{new_account.zip}+{new_account.city},{new_account.country}&" \
+                      f"address={new_account.zip}+{new_account.city},{new_account.country}&" \
                       f"key={GCP_API_KEY}"
 
         try:
@@ -143,21 +135,22 @@ class RESTAccount(Resource):
             return {"status": "invalid request"}
         else:
 
-            if "account_name" in params_dict:
-                account.name = params_dict["account_name"]
-
-            if "email" in params_dict:
+            if "new_email" in params_dict:
+                # Only allowed if email has not been confirmed yet
                 if not account.email_confirmed:
-                    account.email = params_dict["email"]
-                    account.email = params_dict["email"]
+                    new_email = params_dict["new_email"]
+
+                    if api_authentication.validate_email_format(new_email):
+                        existing_account = DBAccount.query.filter(DBAccount.email == new_email).first()
+                        if existing_account is not None:
+                            return {"status": "email already taken"}
+                        else:
+                            account.email = new_email
+                            account.email_confirmed = False
+                    else:
+                        return {"status": "new email is invalid"}
                 else:
                     return {"status": "email has already been confirmed"}
-
-            if "account_phone" in params_dict:
-                if not account.phone_confirmed:
-                    account.phone = params_dict["account_phone"]
-                else:
-                    return {"status": "phone has already been confirmed"}
 
             if "account_old_password" in params_dict and "account_new_password" in params_dict:
                 old_password = params_dict["account_old_password"]
@@ -170,15 +163,14 @@ class RESTAccount(Resource):
                     db.session.expire(account)
                     return {"status": "password invalid"}
 
-            if "account_street" in params_dict:
-                account.street = params_dict["account_street"]
-
             if "account_zip" in params_dict:
                 account.zip = params_dict["account_zip"]
 
+            if "account_city" in params_dict:
+                account.city = params_dict["account_city"]
 
             request_url = f"https://maps.googleapis.com/maps/api/geocode/json?" \
-                          f"address={account.street.replace(' ', '+')},{account.zip}+{account.city},{account.country}&" \
+                          f"address={account.zip}+{account.city},{account.country}&" \
                           f"key={GCP_API_KEY}"
 
             try:
