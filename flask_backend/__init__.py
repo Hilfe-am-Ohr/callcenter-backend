@@ -42,7 +42,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
 
-CORS(app)
+cors = CORS(app)
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 api = Api(app)

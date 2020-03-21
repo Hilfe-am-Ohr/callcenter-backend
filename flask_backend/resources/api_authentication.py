@@ -55,6 +55,8 @@ def login_account(email, password):
                 return {"status": "ok",
                         "email": email,
                         "api_key": api_key}
+            else:
+                return {"status": "invalid email/password"}
         else:
             return {"status": "invalid email/password"}
     else:

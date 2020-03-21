@@ -107,8 +107,9 @@ def backend_logout():
     return {"Status": "Ok"}, 200
 
 
+
 # Actually flask-cors should take care of this but somehow it doesn't always...
 @app.after_request
 def apply_caching(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
+    # response.headers["Access-Control-Allow-Origin"] = "*"
     return response

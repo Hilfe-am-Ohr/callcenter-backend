@@ -32,13 +32,8 @@ class RESTAccount(Resource):
             return {
                 "status": "ok",
                 "account": {
-                    "name": account.name,
-                    "contact": {
-                        "email": account.email,
-                        "phone": account.phone,
-                    },
+                    "email": account.email,
                     "address": {
-                        "street": account.street,
                         "zip": account.zip,
                         "city": account.city,
                         "country": account.country,
@@ -55,57 +50,58 @@ class RESTAccount(Resource):
         # Create a new account
         params_dict = get_params_dict(request)
 
-        existing_account_email = DBAccount.query.filter(DBAccount.email == params_dict["account_email"]).first()
-        if existing_account_email is not None:
-            return {"status": "email already taken"}
-
-        existing_account_phone = DBAccount.query.filter(DBAccount.phone == params_dict["account_phone"]).first()
-        if existing_account_phone is not None:
-            return {"status": "phone number already taken"}
-
         new_account = DBAccount()
 
-        if "account_name" in params_dict:
-            new_account.name = params_dict["account_name"]
-        else:
-            return {"status": "name is missing"}
-
         if "account_email" in params_dict:
-            new_account.email = params_dict["account_email"]
-            new_account.email_confirmed = False
+            if api_authentication.validate_email_format(params_dict["account_email"]):
+                existing_account = DBAccount.query.filter(DBAccount.email == params_dict["account_email"]).first()
+                if existing_account is not None:
+                    return {"status": "email already taken"}
+                else:
+                    new_account.email = params_dict["account_email"]
+                    new_account.email_confirmed = False
+            else:
+                return {"status": "email is invalid"}
         else:
             return {"status": "email is missing"}
 
-        if "account_phone" in params_dict:
-            new_account.phone = params_dict["account_phone"]
-            new_account.phone_confirmed = False
-        else:
-            return {"status": "phone is missing"}
-
         if "account_password" in params_dict:
             password = params_dict["account_password"]
-            hashed_password = bcrypt.generate_password_hash(password + BCRYPT_SALT).decode('UTF-8')
-            new_account.password = hashed_password
+            if len(password) >= 8:
+                hashed_password = bcrypt.generate_password_hash(password + BCRYPT_SALT).decode('UTF-8')
+                new_account.password = hashed_password
+            else:
+                return {"status": "password is too short"}
         else:
             return {"status": "password is missing"}
 
-        if "account_street" in params_dict:
-            new_account.street = params_dict["account_street"]
-        else:
-            return {"status": "street is missing"}
-
         if "account_zip" in params_dict:
-            new_account.zip = params_dict["account_zip"]
+            # noinspection PyShadowingBuiltins
+            zip = params_dict["account_zip"]
+            if len(zip) == 5:
+                new_account.zip = zip
+            else:
+                return {"status": "zip is invalid"}
         else:
             return {"status": "zip is missing"}
 
         if "account_city" in params_dict:
-            new_account.city = params_dict["account_city"]
+            city = params_dict["account_city"]
+
+            if len(city) >= 2:
+                new_account.city = city
+            else:
+                return {"status": "city is invalid"}
         else:
             return {"status": "city is missing"}
 
         if "account_country" in params_dict:
-            new_account.country = params_dict["account_country"]
+            country = params_dict["account_country"]
+
+            if len(country) >= 2:
+                new_account.city = country
+            else:
+                return {"status": "country is invalid"}
         else:
             return {"status": "country is missing"}
 
