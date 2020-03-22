@@ -8,7 +8,7 @@ from flask_restful import Api
 
 try:
     from flask_backend.secrets import SECRET_KEY, BCRYPT_SALT, GCP_API_KEY, SENDGRID_API_KEY
-except FileExistsError:
+except Exception:
     pass
 
 
