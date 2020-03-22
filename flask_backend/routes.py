@@ -127,7 +127,7 @@ def backend_verify_email(verification_token):
 
 
 @app.route("/backend/email/resend", methods=["POST"])
-def backend_verify_email():
+def backend_resend_email():
     params_dict = get_params_dict(request)
 
     if "email" not in params_dict or "api_key" not in params_dict:
