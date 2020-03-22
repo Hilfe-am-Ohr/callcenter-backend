@@ -12,6 +12,7 @@ from flask_backend import db, bcrypt
 from flask_backend import BCRYPT_SALT, GCP_API_KEY
 
 from flask_backend.resources.email_verification import trigger_email_verification
+from flask_backend.resources.api_authentication import get_account_dict
 
 
 class RESTAccount(Resource):
@@ -35,6 +36,7 @@ class RESTAccount(Resource):
                 "status": "ok",
                 "account": {
                     "email": account.email,
+                    "email_verified": account.email_verified,
                     "address": {
                         "zip": account.zip,
                         "city": account.city,
@@ -61,7 +63,7 @@ class RESTAccount(Resource):
                     return {"status": "email already taken"}
                 else:
                     new_account.email = params_dict["account_email"]
-                    new_account.email_confirmed = False
+                    new_account.email_verified = False
             else:
                 return {"status": "email is invalid"}
         else:
@@ -143,23 +145,25 @@ class RESTAccount(Resource):
         else:
 
             if "new_email" in params_dict:
-                # Only allowed if email has not been confirmed yet
-                if not account.email_confirmed:
-                    new_email = params_dict["new_email"]
+                new_email = params_dict["new_email"]
 
-                    if api_authentication.validate_email_format(new_email):
-                        existing_account = DBAccount.query.filter(DBAccount.email == new_email).first()
-                        if existing_account is not None:
-                            return {"status": "email already taken"}
+                if new_email != params_dict["email"]:
+
+                    # Only allowed if email has not been confirmed yet
+                    if not account.email_verified:
+
+                        if api_authentication.validate_email_format(new_email):
+                            existing_account = DBAccount.query.filter(DBAccount.email == new_email).first()
+                            if existing_account is not None:
+                                return {"status": "email already taken"}
+                            else:
+                                account.email = new_email
+                                account.email_verified = False
+                                params_dict["account_resend_email"] = True  # triggers email resend
                         else:
-                            account.email = new_email
-                            account.email_confirmed = False
-
-                            params_dict["account_resend_email"] = True
+                            return {"status": "new email is invalid"}
                     else:
-                        return {"status": "new email is invalid"}
-                else:
-                    return {"status": "email has already been confirmed"}
+                        return {"status": "email has already been confirmed"}
 
             if "account_old_password" in params_dict and "account_new_password" in params_dict:
                 old_password = params_dict["account_old_password"]
@@ -200,7 +204,10 @@ class RESTAccount(Resource):
             if "account_resend_email" in params_dict:
                 trigger_email_verification(account)
 
-            return {"status": "ok"}
+            return {
+                "status": "ok",
+                "account": get_account_dict(account)
+            }
 
     def delete(self):
         # Delete an existing account

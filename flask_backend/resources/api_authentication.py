@@ -41,6 +41,21 @@ def generate_random_key(length=32):
     return random_key
 
 
+def get_account_dict(account):
+    return {
+        "email": account.email,
+        "email_verified": account.email_verified,
+        "address": {
+            "zip": account.zip,
+            "city": account.city,
+            "country": account.country,
+        },
+        "coordinates": {
+            "lat": account.lat,
+            "lng": account.lng,
+        }
+    }
+
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Functions to be accessed from 'routes' directly
@@ -53,8 +68,8 @@ def login_account(email, password):
             if bcrypt.check_password_hash(account.password, password + BCRYPT_SALT):
                 api_key = register_client(account)
                 return {"status": "ok",
-                        "email": email,
-                        "api_key": api_key}
+                        "api_key": api_key,
+                        "account": get_account_dict(account)}
             else:
                 return {"status": "invalid email/password"}
         else:
@@ -86,8 +101,8 @@ def is_authenticated(email, api_key, new_api_key=False):
             new_api_key = api_key
 
         return {"status": "ok",
-                "email": email,
-                "api_key": new_api_key}
+                "api_key": new_api_key,
+                "account": get_account_dict(account)}
     else:
         return {"status": "invalid email/api key"}
 
