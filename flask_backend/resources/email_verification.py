@@ -4,7 +4,7 @@ from sendgrid.helpers.mail import Mail, Personalization, Substitution
 from sendgrid.helpers.mail import *
 from sendgrid import *
 
-from flask_backend import db, SENDGRID_API_KEY
+from flask_backend import db, SENDGRID_API_KEY, BACKEND_URL
 
 from flask_backend.models.db_verification import DBEmailVerification
 from flask_backend.models.db_account import DBAccount
@@ -23,7 +23,7 @@ def send_verification_mail(email, verification_token):
         from_email='verify@hilfe-am-ohr.de',
         to_emails=email,
         subject='Verify your account!',
-        html_content=f'Please verify: <a href=\'http://localhost:5000/backend/email/verify/{verification_token}\'>Verification Link</a>')
+        html_content=f'Please verify: <a href=\'{BACKEND_URL}backend/email/verify/{verification_token}\'>Verification Link</a>')
     try:
         sg = SendGridAPIClient(SENDGRID_API_KEY)
         response = sg.send(message)
