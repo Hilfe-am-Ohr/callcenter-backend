@@ -11,6 +11,8 @@ from flask_backend.resources import api_authentication
 from flask_backend import db, bcrypt
 from flask_backend import BCRYPT_SALT, GCP_API_KEY
 
+from flask_backend.resources.email_verification import trigger_email_verification
+
 
 class RESTAccount(Resource):
     # IMPORTANT: For all of the following operations (except creating accounts) a
@@ -117,6 +119,9 @@ class RESTAccount(Resource):
         db.session.add(new_account)
         db.session.commit()
 
+        # Trigger the whole verification process
+        trigger_email_verification(new_account)
+
         # log in account and return email/api_key
         login_result_dict = api_authentication.login_account(params_dict["account_email"], params_dict["account_password"])
         return login_result_dict
@@ -125,6 +130,8 @@ class RESTAccount(Resource):
     def put(self):
         # Modify an existing account
         params_dict = get_params_dict(request)
+
+
 
         if api_authentication.is_authenticated(params_dict["email"], params_dict["api_key"], new_api_key=False)["status"] == "ok":
             account = DBAccount.query.filter(DBAccount.email == params_dict["email"]).first()
@@ -147,6 +154,8 @@ class RESTAccount(Resource):
                         else:
                             account.email = new_email
                             account.email_confirmed = False
+
+                            params_dict["account_resend_email"] = True
                     else:
                         return {"status": "new email is invalid"}
                 else:
@@ -187,6 +196,9 @@ class RESTAccount(Resource):
                 return {"status": "invalid google geocode response"}
 
             db.session.commit()
+
+            if "account_resend_email" in params_dict:
+                trigger_email_verification(account)
 
             return {"status": "ok"}
 

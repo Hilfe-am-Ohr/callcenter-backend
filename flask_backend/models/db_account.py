@@ -6,7 +6,7 @@ class DBAccount(db.Model):
 
     # Email and phone confirmation using twilio
     email = db.Column(db.String)
-    email_confirmed = db.Column(db.Boolean)
+    email_verified = db.Column(db.Boolean)
 
     # Hashed with bcrypt
     password = db.Column(db.String)

@@ -6,7 +6,10 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_restful import Api
 
-from flask_backend.secrets import SECRET_KEY, BCRYPT_SALT, GCP_API_KEY
+try:
+    from flask_backend.secrets import SECRET_KEY, BCRYPT_SALT, GCP_API_KEY, SENDGRID_API_KEY
+except FileExistsError:
+    pass
 
 
 
@@ -28,6 +31,9 @@ if os.getenv("BCRYPT_SALT") is not None:
 
 if os.getenv("GCP_API_KEY") is not None:
     GCP_API_KEY = os.getenv("GCP_API_KEY")
+
+if os.getenv("SENDGRID_API_KEY") is not None:
+    SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 
 
 

@@ -1,7 +1,9 @@
 from flask_backend import app
-from flask import render_template, request
+from flask import render_template, request, redirect
 from flask_backend.resources import api_authentication
 import time
+
+from flask_backend.resources.email_verification import confirm_email
 
 
 def get_params_dict(request):
@@ -113,3 +115,12 @@ def backend_logout():
 def apply_caching(response):
     # response.headers["Access-Control-Allow-Origin"] = "*"
     return response
+
+
+@app.route("/backend/email/verify/<verification_token>", methods=["GET"])
+def backend_verify_email(verification_token):
+    if confirm_email(verification_token):
+        return redirect("/account")
+    else:
+        return redirect("/register")
+

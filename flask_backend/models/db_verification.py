@@ -1,21 +1,12 @@
 from flask_backend import db
 
 
-class DBEmailConfirmation(db.Model):
+class DBEmailVerification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     account_id = db.Column(db.Integer)
-    verification_token = db.Column(db.String)
+    token = db.Column(db.String)
 
     def __repr__(self):
-        return f"DBEmailConfirmation(account_id: {self.account_id}, verification_token: {self.verification_token})"
+        return f"DBEmailVerification(account_id: {self.account_id}, token: {self.token})"
 
-
-class DBPhoneConfirmation(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-
-    account_id = db.Column(db.Integer)
-    verification_token = db.Column(db.String)
-
-    def __repr__(self):
-        return f"DBPhoneConfirmation(account_id: {self.account_id}, verification_token: {self.verification_token})"
