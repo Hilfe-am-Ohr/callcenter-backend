@@ -235,3 +235,4 @@ $RECYCLE.BIN/
 # End of https://www.gitignore.io/api/linux,macos,flask,python,windows
 /flask_backend/secrets.py
 /playground/
+/react_frontend/

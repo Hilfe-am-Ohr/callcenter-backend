@@ -143,3 +143,7 @@ def backend_resend_email():
         else:
             return {"status": "email/api_key invalid"}, 200
 
+
+@app.route("/backend/callback", methods=["POST"])
+def backend_callback_():
+    return {"status": "ok"}, 200
