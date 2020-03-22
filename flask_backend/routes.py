@@ -3,7 +3,8 @@ from flask import render_template, request, redirect
 from flask_backend.resources import api_authentication
 import time
 
-from flask_backend.resources.email_verification import confirm_email
+from flask_backend.resources.email_verification import confirm_email, trigger_email_verification
+from flask_backend.models.db_account import DBAccount
 
 
 def get_params_dict(request):
@@ -95,7 +96,7 @@ def backend_login():
         login_result_dict = api_authentication.is_authenticated(params_dict["email"], params_dict["api_key"])
         return login_result_dict, 200
     else:
-        return {"Status": "Missing parameter email/password/api_key"}, 200
+        return {"status": "missing parameter email/password/api_key"}, 200
 
 
 @app.route("/backend/logout", methods=["POST"])
@@ -103,10 +104,10 @@ def backend_logout():
     params_dict = get_params_dict(request)
 
     if "email" not in params_dict or "api_key" not in params_dict:
-        return {"Status": "Missing parameter email/api_key"}, 200
+        return {"Status": "missing parameter email/api_key"}, 200
     else:
         api_authentication.logout_account(params_dict["email"], params_dict["api_key"])
-    return {"Status": "Ok"}, 200
+    return {"status": "ok"}, 200
 
 
 
@@ -123,4 +124,22 @@ def backend_verify_email(verification_token):
         return redirect("/account")
     else:
         return redirect("/register")
+
+
+@app.route("/backend/email/resend", methods=["POST"])
+def backend_verify_email():
+    params_dict = get_params_dict(request)
+
+    if "email" not in params_dict or "api_key" not in params_dict:
+        return {"status": "missing parameter email/api_key"}, 200
+    else:
+        if api_authentication.is_authenticated(params_dict["email"], params_dict["api_key"])["status"] == "ok":
+            account = DBAccount.query.filter(DBAccount.email == params_dict["email"]).first()
+            if not account.email_verified:
+                trigger_email_verification(account)
+                return {"status": "ok"}, 200
+            else:
+                return {"status": "email already verified"}, 200
+        else:
+            return {"status": "email/api_key invalid"}, 200
 
