@@ -19,6 +19,9 @@ class DBAccount(db.Model):
     lat = db.Column(db.Float)
     lng = db.Column(db.Float)
 
+    # If online the hub sends pending request to this person
+    online = db.Column(db.Boolean)
+
     def __repr__(self):
         return f"DBAccount(id: {self.id}, email: {self.email}, lat/lng: {self.lat}/{self.lng})"
 

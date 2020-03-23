@@ -3,7 +3,11 @@ from flask_backend.models.db_account import DBAccount
 from flask_backend.models.db_authentication import APIKey
 from flask_backend import BCRYPT_SALT
 
+from flask_backend.resources import hub_communication
+
 import random
+
+from flask_backend.resources import hub_communication
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -41,22 +45,6 @@ def generate_random_key(length=32):
     return random_key
 
 
-def get_account_dict(account):
-    return {
-        "email": account.email,
-        "email_verified": account.email_verified,
-        "address": {
-            "zip": account.zip,
-            "city": account.city,
-            "country": account.country,
-        },
-        "coordinates": {
-            "lat": account.lat,
-            "lng": account.lng,
-        }
-    }
-
-
 # ---------------------------------------------------------------------------------------------------------------------
 # Functions to be accessed from 'routes' directly
 
@@ -67,9 +55,11 @@ def login_account(email, password):
         if account is not None:
             if bcrypt.check_password_hash(account.password, password + BCRYPT_SALT):
                 api_key = register_client(account)
-                return {"status": "ok",
-                        "api_key": api_key,
-                        "account": get_account_dict(account)}
+
+                calls_dict = hub_communication.get_all_calls(account)
+                calls_dict["api_key"] = api_key
+
+                return calls_dict
             else:
                 return {"status": "invalid email/password"}
         else:
@@ -100,9 +90,10 @@ def is_authenticated(email, api_key, new_api_key=False):
         else:
             new_api_key = api_key
 
-        return {"status": "ok",
-                "api_key": new_api_key,
-                "account": get_account_dict(account)}
+        calls_dict = hub_communication.get_all_calls(account)
+        calls_dict["api_key"] = new_api_key
+
+        return calls_dict
     else:
         return {"status": "invalid email/api key"}
 
@@ -119,6 +110,7 @@ def logout_account(email, api_key):
         return False
 
     unregister_client(account)
+    hub_communication.go_offline(account)
 
     return True
 

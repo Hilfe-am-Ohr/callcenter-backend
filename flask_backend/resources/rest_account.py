@@ -12,7 +12,7 @@ from flask_backend import db, bcrypt
 from flask_backend import BCRYPT_SALT, GCP_API_KEY
 
 from flask_backend.resources.email_verification import trigger_email_verification
-from flask_backend.resources.api_authentication import get_account_dict
+from flask_backend.resources import hub_communication
 
 
 class RESTAccount(Resource):
@@ -35,6 +35,7 @@ class RESTAccount(Resource):
             return {
                 "status": "ok",
                 "account": {
+                    "online": account.online,
                     "email": account.email,
                     "email_verified": account.email_verified,
                     "address": {
@@ -204,10 +205,7 @@ class RESTAccount(Resource):
             if "account_resend_email" in params_dict:
                 trigger_email_verification(account)
 
-            return {
-                "status": "ok",
-                "account": get_account_dict(account)
-            }
+            return hub_communication.get_all_calls()
 
     def delete(self):
         # Delete an existing account

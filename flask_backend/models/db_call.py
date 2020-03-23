@@ -9,8 +9,9 @@ class DBCall(db.Model):
     phone_number = db.Column(db.String)
     timestamp = db.Column(db.DateTime)
 
-    fulfilled = db.Column(db.Boolean)  # 0 = accepted and pending, 1 = fulfilled
+    status = db.Column(db.String)  # "pending", "accepted" and "fulfilled"
 
     def __repr__(self):
         return f"DBCall(id: {self.id}, account_id: {self.account_id}, phone_number: {self.phone_number}, fulfilled: {self.fulfilled})"
+
 

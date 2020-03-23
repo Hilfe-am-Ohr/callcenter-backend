@@ -7,7 +7,7 @@ from flask_cors import CORS
 from flask_restful import Api
 
 try:
-    from flask_backend.secrets import SECRET_KEY, BCRYPT_SALT, GCP_API_KEY, SENDGRID_API_KEY, BACKEND_URL
+    from flask_backend.secrets import SECRET_KEY, BCRYPT_SALT, GCP_API_KEY, SENDGRID_API_KEY, BACKEND_URL, HUB_URL
 except Exception:
     pass
 
@@ -38,6 +38,9 @@ if os.getenv("SENDGRID_API_KEY") is not None:
 if os.getenv("BACKEND_URL") is not None:
     BACKEND_URL = os.getenv("BACKEND_URL")
 
+if os.getenv("HUB_URL") is not None:
+    HUB_URL = os.getenv("HUB_URL")
+
 
 
 
@@ -62,6 +65,8 @@ api = Api(app)
 from flask_backend.resources.rest_account import RESTAccount
 api.add_resource(RESTAccount, "/backend/database/account")
 
+from flask_backend.resources.rest_call import RESTCall
+api.add_resource(RESTCall, "/backend/database/call")
 
 
 
