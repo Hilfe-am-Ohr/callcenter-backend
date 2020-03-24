@@ -205,7 +205,7 @@ class RESTAccount(Resource):
             if "account_resend_email" in params_dict:
                 trigger_email_verification(account)
 
-            return hub_communication.get_all_calls()
+            return hub_communication.get_all_calls(account)
 
     def delete(self):
         # Delete an existing account
